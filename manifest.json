@@ -3,11 +3,11 @@
     "name": "Safety 550",
     "description": "Google Chrome Online Safety Extension",
     "version": "1.0",
-    "permissions": [],
+    "permissions": ["storage", "tabs"],
     "action": {
       "default_icon": "images/redBirb.png"
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "scripts/background.js"
     }
   }
