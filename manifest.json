@@ -5,7 +5,8 @@
     "version": "1.0",
     "permissions": ["storage", "tabs"],
     "action": {
-      "default_icon": "images/redBirb.png"
+      "default_icon": "images/redBirb.png",
+      "default_popup": "popup.html"
     },
     "background": {
         "service_worker": "scripts/background.js"
