@@ -1,7 +1,6 @@
 .star-rating {
     font-size: 2em;
     cursor: pointer;
-    direction: rtl;
     text-align: left;
   }
   
@@ -10,8 +9,6 @@
   transition: color 0.2s;
 }
 
-.star:hover,
-.star:hover ~ .star,
 .star.selected {
   color: gold;
 }
