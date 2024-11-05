@@ -1,11 +1,11 @@
 .star-rating {
     font-size: 2em;
-    cursor: pointer;
     text-align: left;
   }
   
 .star {
   color: lightgray;
+  cursor: pointer;
   transition: color 0.2s;
 }
 

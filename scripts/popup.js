@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contentDiv.innerHTML = html;
                 if (url === "popup_a.html") {
                     setUpStars();
+                    document.getElementById("submit").addEventListener("click", function() {submitRating()});
                 }
             })
             .catch(error => {
@@ -30,22 +31,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setUpStars() {
-    const stars = document.querySelectorAll('.star');
-    const ratingValue = document.getElementById('rating-value');
+    document.querySelectorAll('.star-rating').forEach((rating) => {
+        const stars = rating.querySelectorAll('.star');
+        const ratingValue = rating.querySelector('#rating-value');
+        
+        stars.forEach((star) => {
+            star.addEventListener('click', function () {
+                const rating = this.getAttribute('data-value');
+                ratingValue.textContent = rating;
+                
+                stars.forEach(s => s.classList.remove('selected'));
 
-    stars.forEach((star) => {
-        star.addEventListener('click', function () {
-            const rating = this.getAttribute('data-value');
-            ratingValue.textContent = rating;
-            
-            stars.forEach(s => s.classList.remove('selected'));
-
-            this.classList.add('selected');
-            let previousStar = this.previousElementSibling;
-            while (previousStar) {
-                previousStar.classList.add('selected');
-                previousStar = previousStar.previousElementSibling;
-            }
+                this.classList.add('selected');
+                let previousStar = this.previousElementSibling;
+                while (previousStar) {
+                    previousStar.classList.add('selected');
+                    previousStar = previousStar.previousElementSibling;
+                }
+            });
         });
     });
+}
+
+async function submitRating() {
+    const ratingSet = {};
+    const tab = await chrome.tabs.query({active: true, currentWindow: true});
+    console.log(tab[0].url);
+    //ratingSet['url'] = tab['url'];
+    document.querySelectorAll('.star-rating').forEach((rating) => {
+        const ratingValue = rating.querySelector('#rating-value');
+        const category = rating.querySelector('#category').textContent;
+        ratingSet[category] = ratingValue;
+    });
+    console.log(JSON.stringify(ratingSet));
 }
