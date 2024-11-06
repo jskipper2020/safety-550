@@ -56,12 +56,37 @@ function setUpStars() {
 async function submitRating() {
     const ratingSet = {};
     const tab = await chrome.tabs.query({active: true, currentWindow: true});
-    console.log(tab[0].url);
-    //ratingSet['url'] = tab['url'];
+    ratingSet['url'] = tab[0].url;
+    
+    let allRated = true;
     document.querySelectorAll('.star-rating').forEach((rating) => {
-        const ratingValue = rating.querySelector('#rating-value');
+        const ratingValue = rating.querySelector('#rating-value').textContent;
         const category = rating.querySelector('#category').textContent;
-        ratingSet[category] = ratingValue;
+
+        if (ratingValue === "0") {
+            allRated = false;
+        }
+        
+        ratingSet[category] = parseInt(ratingValue);
     });
+
+    // Check if all categories are rated
+    if (!allRated) {
+        const existingWarning = document.getElementById('warning');
+        if (!existingWarning) {  // Only add warning if it doesn’t already exist
+            const warning = document.createElement('p');
+            warning.textContent = "Please enter a rating for all categories.";
+            warning.id = 'warning';
+            document.getElementById('submit').insertAdjacentElement('beforebegin', warning);
+        }
+        return;
+    }
+
+    // Remove warning if it exists and all ratings are provided
+    const existingWarning = document.getElementById('warning');
+    if (existingWarning) {
+        existingWarning.remove();
+    }
+
     console.log(JSON.stringify(ratingSet));
 }
