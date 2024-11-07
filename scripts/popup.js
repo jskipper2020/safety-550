@@ -56,7 +56,12 @@ function setUpStars() {
 async function submitRating() {
     const ratingSet = {};
     const tab = await chrome.tabs.query({active: true, currentWindow: true});
-    ratingSet['url'] = tab[0].url;
+    const url = new URL(tab[0].url);
+    if (url.protocol != "http:" && url.protocol != "https:") {
+        throwWarningA("This page cannot be rated.");
+        return;
+    }
+    ratingSet['url'] = url.hostname;
     
     let allRated = true;
     document.querySelectorAll('.star-rating').forEach((rating) => {
@@ -72,13 +77,7 @@ async function submitRating() {
 
     // Check if all categories are rated
     if (!allRated) {
-        const existingWarning = document.getElementById('warning');
-        if (!existingWarning) {  // Only add warning if it doesn’t already exist
-            const warning = document.createElement('p');
-            warning.textContent = "Please enter a rating for all categories.";
-            warning.id = 'warning';
-            document.getElementById('submit').insertAdjacentElement('beforebegin', warning);
-        }
+        throwWarningA("Please enter a rating for all categories.");
         return;
     }
 
@@ -89,4 +88,17 @@ async function submitRating() {
     }
 
     console.log(JSON.stringify(ratingSet));
+}
+
+function throwWarningA(text) {
+    const existingWarning = document.getElementById('warning');
+    if (existingWarning && existingWarning.textContent != text) {
+        warning.textContent = text;
+    }
+    if (!existingWarning) {
+        const warning = document.createElement('p');
+        warning.textContent = text;
+        warning.id = 'warning';
+        document.getElementById('submit').insertAdjacentElement('beforebegin', warning);
+    }
 }
