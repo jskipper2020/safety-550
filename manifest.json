@@ -3,7 +3,7 @@
     "name": "Safety 550",
     "description": "Google Chrome Online Safety Extension",
     "version": "1.0",
-    "permissions": ["storage", "tabs"],
+    "permissions": ["webNavigation", "storage", "tabs"],
     "action": {
       "default_icon": "images/redBirb.png",
       "default_popup": "popup.html"

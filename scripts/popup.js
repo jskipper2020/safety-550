@@ -87,7 +87,7 @@ async function submitRating() {
         existingWarning.remove();
     }
 
-    console.log(JSON.stringify(ratingSet));
+    await addRating(ratingSet);
 }
 
 function throwWarningA(text) {
@@ -102,3 +102,24 @@ function throwWarningA(text) {
         document.getElementById('submit').insertAdjacentElement('beforebegin', warning);
     }
 }
+
+async function addRating(ratingData) {
+    try {
+      const response = await fetch("http://localhost:3000/add-rating", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(ratingData)
+      });
+  
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Rating added successfully:", result);
+      } else {
+        console.error("Failed to add rating:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
