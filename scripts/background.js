@@ -19,7 +19,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 
 async function checkRatings(tab, url) {
     try {
-        const response = await fetch(`http://localhost:3000/ratings?url=${url}`, {
+        const response = await fetch(`https://s550backend-production.up.railway.app/ratings?url=${url}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json"

@@ -105,7 +105,7 @@ function throwWarningA(text) {
 
 async function addRating(ratingData) {
     try {
-      const response = await fetch("http://localhost:3000/add-rating", {
+      const response = await fetch("https://s550backend-production.up.railway.app/add-rating", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
