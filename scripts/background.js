@@ -38,11 +38,19 @@ async function checkRatings(tab, url) {
                     warning = true;
                 }
             }
-            if (warning) {
-                chrome.storage.local.set({ "ratingResult": resultObject }, () => {
-                    chrome.tabs.update(tab, { url: chrome.runtime.getURL("warning.html") });
-                });
-            }
+
+            const tabToReplace = await chrome.tabs.query({active: true, currentWindow: true});
+
+            chrome.storage.local.get("mutedWebsites", (result) => {
+                const mutedWebsites = result.mutedWebsites || [];
+                console.log("Muted: ", mutedWebsites);
+                if (warning && !mutedWebsites.includes(url)) {
+                    const replacedUrl = new URL(tabToReplace[0].url);
+                    chrome.storage.local.set({ "ratingResult": resultObject, "originalUrl": replacedUrl.href }, () => {
+                        chrome.tabs.update(tab, { url: chrome.runtime.getURL("warning.html") });
+                    });
+                }
+            })
           }
         } else {
           console.error("Error: ", response.statusText);

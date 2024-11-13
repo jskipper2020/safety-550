@@ -1,6 +1,7 @@
 document.getElementById('child').addEventListener('click', function() {
     chrome.storage.local.set({
-        mode: ['child']
+        mode: ['child'],
+        mutedWebsites: []
     });
     window.location.href = 'childhelp.html';
 });
