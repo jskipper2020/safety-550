@@ -1,7 +1,9 @@
+// runs on the welcome page, sends user to child or adult help page and stores their mode
+
 document.getElementById('child').addEventListener('click', function() {
     chrome.storage.local.set({
         mode: ['child'],
-        mutedWebsites: []
+        mutedWebsites: [] // only necessary for children because adults are never blocked
     });
     window.location.href = 'childhelp.html';
 });

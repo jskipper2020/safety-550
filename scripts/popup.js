@@ -1,6 +1,9 @@
+// this is code for both popups, but the popup for children doesn't have anything yet so there's nothing there for them
+
+// works by loading a main popup.html and moving to a different popup page based on mode
 document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get("mode", (result) => {
-        const contentDiv = document.getElementById('content');
+        const contentDiv = document.getElementById('content'); // replace original popup.html with the respective popup using this
         let url;
 
         if (result.mode) {
@@ -9,12 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 url = "popup_a.html";
             }
-        } else {
+        } else { // if the user didn't pick adult/child, send them back to welcome page
             chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
             return;
         }
 
-        // Load the content based on the mode
+        // load the content based on the mode
         fetch(chrome.runtime.getURL(url))
             .then(response => response.text())
             .then(html => {
@@ -30,12 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function setUpStars() {
+function setUpStars() { // this enables the rating functionality for each category's set of stars
     document.querySelectorAll('.star-rating').forEach((rating) => {
         const stars = rating.querySelectorAll('.star');
         const ratingValue = rating.querySelector('#rating-value');
         
-        stars.forEach((star) => {
+        stars.forEach((star) => { // how the star that's clicked on and every star before it is considered selected
             star.addEventListener('click', function () {
                 const rating = this.getAttribute('data-value');
                 ratingValue.textContent = rating;
@@ -54,34 +57,35 @@ function setUpStars() {
 }
 
 async function submitRating() {
-    const ratingSet = {};
+    const ratingSet = {}; // object storing the rating
     const tab = await chrome.tabs.query({active: true, currentWindow: true});
-    const url = new URL(tab[0].url);
-    if (url.protocol != "http:" && url.protocol != "https:") {
+    const url = new URL(tab[0].url); // URL object organizes a URL into its useful properties
+    if (url.protocol != "http:" && url.protocol != "https:") { // anything that isn't on http or https isn't a webpage
         throwWarningA("This page cannot be rated.");
         return;
     }
-    ratingSet['url'] = url.hostname;
+    let domain = url.hostname.replace(/^www\./, ''); // strip the saved URL's hostname of any "www." so there aren't two sets of ratings for one webpage
+    ratingSet['url'] = domain;
     
     let allRated = true;
     document.querySelectorAll('.star-rating').forEach((rating) => {
         const ratingValue = rating.querySelector('#rating-value').textContent;
         const category = rating.querySelector('#category').textContent;
 
-        if (ratingValue === "0") {
+        if (ratingValue === "0") { // a 0 value means a rating has not been selected for that category
             allRated = false;
         }
         
         ratingSet[category] = parseInt(ratingValue);
     });
 
-    // Check if all categories are rated
+    // check if all categories are rated
     if (!allRated) {
         throwWarningA("Please enter a rating for all categories.");
         return;
     }
 
-    // Remove warning if it exists and all ratings are provided
+    // remove warning if it exists and all ratings are provided
     const existingWarning = document.getElementById('warning');
     if (existingWarning) {
         existingWarning.remove();
@@ -90,8 +94,8 @@ async function submitRating() {
     await addRating(ratingSet);
 }
 
-function throwWarningA(text) {
-    const existingWarning = document.getElementById('warning');
+function throwWarningA(text) { // for alerting an adult user of any errors on their part or the program's
+    const existingWarning = document.getElementById('warning'); // don't let warnings stack on each other
     if (existingWarning && existingWarning.textContent != text) {
         warning.textContent = text;
     }
@@ -104,7 +108,7 @@ function throwWarningA(text) {
 }
 
 async function addRating(ratingData) {
-    try {
+    try { // send rating to the database through the backend server
       const response = await fetch("https://s550backend-production.up.railway.app/add-rating", {
         method: "POST",
         headers: {
