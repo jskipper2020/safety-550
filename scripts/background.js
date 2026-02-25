@@ -2,6 +2,16 @@ chrome.runtime.onInstalled.addListener(() => { // open welcome page on installat
     chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
 });
 
+async function crawl(domain) {
+    await fetch("http://localhost:3000/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: domain })
+    })
+    .then(res => res.json())
+    .then(data => console.log(data));
+}
+
 // runs the ratings check for child users when a navigation is committed, meaning entering a URL or clicking a link
 // likely the source of the split second issue
 chrome.webNavigation.onCommitted.addListener((details) => {
@@ -13,6 +23,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
                 if (details.url != warningPageUrl) { // don't check the ratings of the warning page, that opens the door to infinite tabs opening
                     const currUrl = new URL(details.url);
                     let hostname = currUrl.hostname.replace(/^www\./, '');
+                    crawl(hostname); // run web crawler on the domain being loaded
                     checkRatings(details.tabId, hostname);
                 }
             }
@@ -23,13 +34,13 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 // look up the ratings of a specific website in the database, and open warning if any category's average is below the threshold
 async function checkRatings(tab, url) {
     try {
-        const response = await fetch(`https://s550backend-production.up.railway.app/ratings?url=${url}`, {
+        const response = await fetch(`http://localhost:3000/ratings?url=${url}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json"
           }
         });
-    
+        console.log(response);
         if (response.ok) {
           const result = await response.json();
           if (result.length > 0) { // if there are any reviews, they will be in an object inside an array; if not, the object won't be there
@@ -38,7 +49,7 @@ async function checkRatings(tab, url) {
             for (const key in resultObject) {
                 if (typeof resultObject[key] != "number") { // remove the url field so numbers can be checked here and in the warning code
                     delete resultObject[key];
-                } else if (resultObject[key] < 4 && !warning) { // warning will come up if any category is below the threshold (4)
+                } else if (resultObject[key] < 3 && !warning) { // warning will come up if any category is below the threshold (3)
                     warning = true;
                 }
             }

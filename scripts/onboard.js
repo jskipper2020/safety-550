@@ -1,5 +1,9 @@
 // runs on the welcome page, sends user to child or adult help page and stores their mode
 
+chrome.storage.local.set({ // storage for the crawler, will need time sensitivity like the pop ups
+    crawledURLs: []
+})
+
 document.getElementById('child').addEventListener('click', function() {
     chrome.storage.local.set({
         mode: ['child'],

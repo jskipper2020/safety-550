@@ -5,7 +5,7 @@
     "version": "1.0",
     "permissions": ["webNavigation", "storage", "tabs"],
     "action": {
-      "default_icon": "images/redBirb.png",
+      "default_icon": "images/light-bulb.jpg",
       "default_popup": "popup.html"
     },
     "background": {
