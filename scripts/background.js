@@ -3,7 +3,7 @@ chrome.runtime.onInstalled.addListener(() => { // open welcome page on installat
 });
 
 async function crawl(domain) {
-    await fetch("http://localhost:3000/crawl", {
+    await fetch("https://seashell-app-irlrr.ondigitalocean.app/crawl", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ domain: domain })
@@ -34,7 +34,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 // look up the ratings of a specific website in the database, and open warning if any category's average is below the threshold
 async function checkRatings(tab, url) {
     try {
-        const response = await fetch(`http://localhost:3000/ratings?url=${url}`, {
+        const response = await fetch(`https://seashell-app-irlrr.ondigitalocean.app/ratings?url=${url}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json"

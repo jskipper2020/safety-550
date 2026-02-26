@@ -109,7 +109,7 @@ function throwWarningA(text) { // for alerting an adult user of any errors on th
 
 async function addRating(ratingData) {
     try { // send rating to the database through the backend server
-      const response = await fetch("http://localhost:3000/add-rating", {
+      const response = await fetch("https://seashell-app-irlrr.ondigitalocean.app/add-rating", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
