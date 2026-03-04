@@ -24,17 +24,45 @@ chrome.webNavigation.onCommitted.addListener((details) => {
                     const currUrl = new URL(details.url);
                     let hostname = currUrl.hostname.replace(/^www\./, '');
                     crawl(hostname); // run web crawler on the domain being loaded
-                    checkRatings(details.tabId, hostname);
+                    checkRatings(details.tabId, hostname, "ratings");
+                }
+            } else if (details.frameId === 0 && 
+            ((result.mode[0] === "child_ai") || (result.mode[0] === "adult_ai"))) {
+                const warningPageUrl = chrome.runtime.getURL("warning.html");
+                if (details.url != warningPageUrl) { // don't check the ratings of the warning page, that opens the door to infinite tabs opening
+                    const currUrl = new URL(details.url);
+                    let hostname = currUrl.hostname.replace(/^www\./, '');
+                    crawl(hostname); // run web crawler on the domain being loaded
+                    checkRatings(details.tabId, hostname, "aiRating");
                 }
             }
         }
     });
 });
+/*
+async function checkAIRating(tab, url) {
+    try {
+        const response = await fetch(`https://seashell-app-irlrr.ondigitalocean.app/aiRating?url=${url}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        if (response.ok) {
+            const result = await response.json;
+            if (result.length > 0) {
+                const resultObject = result[0];
+            }
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+} */
 
 // look up the ratings of a specific website in the database, and open warning if any category's average is below the threshold
-async function checkRatings(tab, url) {
+async function checkRatings(tab, url, path) {
     try {
-        const response = await fetch(`https://seashell-app-irlrr.ondigitalocean.app/ratings?url=${url}`, {
+        const response = await fetch(`https://seashell-app-irlrr.ondigitalocean.app/${path}?url=${url}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json"
@@ -46,6 +74,7 @@ async function checkRatings(tab, url) {
           if (result.length > 0) { // if there are any reviews, they will be in an object inside an array; if not, the object won't be there
             const resultObject = result[0];
             let warning = false;
+            console.log(resultObject);
             for (const key in resultObject) {
                 if (typeof resultObject[key] != "number") { // remove the url field so numbers can be checked here and in the warning code
                     delete resultObject[key];
