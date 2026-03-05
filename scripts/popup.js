@@ -55,23 +55,38 @@ async function obtainAIRating() {
         });
         if (response.ok) {
             const result = await response.json();
+            /*
             try { // validate ai-generated json
                 JSON.parse(result);
             } catch (error) {
-                const aiError = document.querySelector('aierror');
-                aiError.setAttribute("hidden", "false");
+                const aiError = document.getElementById('aierror');
+                aiError.hidden = false;
                 return;
             }
+            */
             
-            const ratingElement = document.querySelector('rating');
-            ratingElement.setAttribute("hidden", false)
+            const ratingElement = document.getElementById('rating');
+            ratingElement.hidden = false;
             ratingElement.querySelectorAll('.star-rating').forEach((rating) => {
-                const category = rating.querySelector('category').textContent;
-                console.log(result[category]);
+                const category = rating.querySelector('p').textContent;
+                const stars = rating.querySelectorAll('.star');
+                const ratingValue = rating.querySelector('#rating-value');
+                ratingValue.textContent = result[category];
+
+                stars.forEach((star) => {
+                    if (star.getAttribute('data-value') === ratingValue.textContent) {
+                        star.classList.add('selected');
+                        let previousStar = star.previousElementSibling;
+                        while (previousStar) {
+                            previousStar.classList.add('selected');
+                            previousStar = previousStar.previousElementSibling;
+                        }
+                    }
+                })
             });
         } else {
-            const aiError = document.querySelector('aierror');
-            aiError.setAttribute("hidden", "false");
+            const aiError = document.getElementById('aierror');
+            aiError.hidden = false;
             return;
         };
     } catch (error) {
