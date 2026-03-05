@@ -9,8 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.mode) {
             if (result.mode[0] === "child") {
                 url = "popup_c.html";
-            } else {
+            } else if (result.mode[0] === "adult") {
                 url = "popup_a.html";
+            } else {
+                url = "popup_ai.html";
             }
         } else { // if the user didn't pick adult/child, send them back to welcome page
             chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
@@ -25,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (url === "popup_a.html") {
                     setUpStars();
                     document.getElementById("submit").addEventListener("click", function() {submitRating()});
+                } else if (url === "popup_ai.html") {
+                    obtainAIRating();
+                    // document.getElementById("correct").addEventListener("click", function() {correctAIRating()});
                 }
             })
             .catch(error => {
@@ -32,6 +37,47 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 });
+
+async function obtainAIRating() {
+    const tab = await chrome.tabs.query({active: true, currentWindow: true});
+    const url = new URL(tab[0].url); // URL object organizes a URL into its useful properties
+    if (url.protocol != "http:" && url.protocol != "https:") { // anything that isn't on http or https isn't a webpage
+        throwWarningB("This page cannot be rated.");
+        return;
+    }
+    let domain = url.hostname.replace(/^www\./, ''); // strip the saved URL's hostname of any "www." so there aren't two sets of ratings for one webpage
+    try {
+        const response = await fetch(`https://seashell-app-irlrr.ondigitalocean.app/aiRating?url=${domain}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+        if (response.ok) {
+            const result = await response.json();
+            try { // validate ai-generated json
+                JSON.parse(result);
+            } catch (error) {
+                const aiError = document.querySelector('aierror');
+                aiError.setAttribute("hidden", "false");
+                return;
+            }
+            
+            const ratingElement = document.querySelector('rating');
+            ratingElement.setAttribute("hidden", false)
+            ratingElement.querySelectorAll('.star-rating').forEach((rating) => {
+                const category = rating.querySelector('category').textContent;
+                console.log(result[category]);
+            });
+        } else {
+            const aiError = document.querySelector('aierror');
+            aiError.setAttribute("hidden", "false");
+            return;
+        };
+    } catch (error) {
+        throwWarningB("Error connecting to database");
+    };
+}
 
 function setUpStars() { // this enables the rating functionality for each category's set of stars
     document.querySelectorAll('.star-rating').forEach((rating) => {
@@ -104,6 +150,19 @@ function throwWarningA(text) { // for alerting an adult user of any errors on th
         warning.textContent = text;
         warning.id = 'warning';
         document.getElementById('submit').insertAdjacentElement('beforebegin', warning);
+    }
+}
+
+function throwWarningB(text) { // for alerting an adult user of any errors on their part or the program's
+    const existingWarning = document.getElementById('warning'); // don't let warnings stack on each other
+    if (existingWarning && existingWarning.textContent != text) {
+        warning.textContent = text;
+    }
+    if (!existingWarning) {
+        const warning = document.createElement('p');
+        warning.textContent = text;
+        warning.id = 'warning';
+        document.getElementById('correct').insertAdjacentElement('beforebegin', warning);
     }
 }
 

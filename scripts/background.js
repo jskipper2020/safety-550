@@ -9,7 +9,7 @@ async function crawl(domain) {
         body: JSON.stringify({ domain: domain })
     })
     .then(res => res.json())
-    .then(data => console.log(data));
+    //.then(data => console.log(data));
 }
 
 // runs the ratings check for child users when a navigation is committed, meaning entering a URL or clicking a link
